@@ -46,7 +46,7 @@ class YAVR extends IPSModule
         if (array_key_exists($value, $inputs2)) {
             return $inputs2[$value];
         } else {
-            throw new Exception("Invalid input $key");
+            throw new Exception("Invalid input $value");
         }
     }
 
