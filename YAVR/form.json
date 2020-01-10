@@ -32,16 +32,7 @@
       "caption": "Sekunden"
     }
   ],
-  "actions": [{
-      "type": "Button",
-      "label": "Einschalten",
-      "onClick": "YAVR_SetState($id, true);"
-    },
-    {
-      "type": "Button",
-      "label": "Standby",
-      "onClick": "YAVR_SetState($id, false);"
-    },
+  "actions": [
     {
       "type": "Button",
       "label": "Szenen neu erstellen",
@@ -56,23 +47,11 @@
       "type": "Button",
       "label": "Status abgleichen",
       "onClick": "print_r(YAVR_RequestData($id));"
-    }
+    },
+    {
+      "type": "TestCenter"}
   ],
-  "status": [{
-      "code": 101,
-      "icon": "active",
-      "caption": "Receiver wird erstellt."
-    },
-    {
-      "code": 102,
-      "icon": "active",
-      "caption": "Receiver is aktiv."
-    },
-    {
-      "code": 103,
-      "icon": "active",
-      "caption": "Receiver wird gelöscht."
-    },
+  "status": [
     {
       "code": 201,
       "icon": "error",
