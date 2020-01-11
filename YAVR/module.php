@@ -41,33 +41,28 @@ class YAVR extends IPSModule
         }
     }
 
-    public function GetInputId(string $value): ?string
+    public function GetInputId(string $value): ?int
     {
         $inputs = json_decode($this->ReadPropertyString('InputsMapping'), true, 512, JSON_THROW_ON_ERROR);
-        $inputs2 = array();
+
         foreach ($inputs as $id => $data) {
-            $inputs2[$data['title']] = $id;
-        }
-        if (array_key_exists($value, $inputs2)) {
-            return $inputs2[$value];
+            if ($value === $data['id']){
+                return $id;
+            }
         }
 
-        trigger_error("Invalid input $value", E_USER_ERROR);
+        trigger_error("Invalid input key '$value'", E_USER_ERROR);
         return null;
     }
 
-    public function GetInputKey(int $value): ?int
+    public function GetInputKey(int $value): ?string
     {
         $inputs = json_decode($this->ReadPropertyString('InputsMapping'), true, 512, JSON_THROW_ON_ERROR);
-        $inputs2 = array();
-        foreach ($inputs as $id => $data) {
-            $inputs2[$id] = $data['id'];
-        }
-        if (isset ($id) && array_key_exists($id, $inputs2)) {
-            return $inputs2[$value];
+        if (isset($inputs[$value])){
+            return $inputs[$value]['id'];
         }
 
-        trigger_error("Invalid input: $value", E_USER_ERROR);
+        trigger_error("Invalid input id '$value'", E_USER_ERROR);
         return null;
     }
 
