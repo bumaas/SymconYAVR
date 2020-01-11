@@ -82,7 +82,7 @@ Aktiviert für den Receiver mit der InstanzID $InstanzID auf den Eingang $Input 
 Die Funktion liefert keinerlei Rückgabewert.  
 `YAVR_SetInput(12345, 'HDMI1');`
 
-`YAVR_RequestData(integer $InstanzID);`
+`YAVR_RequestStatus(integer $InstanzID);`
 Gleicht den Status ab mit der InstanzID $InstanzID.
 Die Funktion liefert keinerlei Rückgabewert.
-`YAVR_RequestData(12345);`
+`YAVR_RequestStatus(12345);`

@@ -46,7 +46,7 @@
     {
       "type": "Button",
       "label": "Status abgleichen",
-      "onClick": "print_r(YAVR_RequestData($id));"
+      "onClick": "print_r(YAVR_RequestStatus($id));"
     },
     {
       "type": "TestCenter"}
