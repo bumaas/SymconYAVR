@@ -25,7 +25,7 @@ class YAVR extends IPSModule
 
         $this->RegisterTimer('Update', 0, 'YAVR_RequestData($_IPS[\'TARGET\'], 0);');
 
-        if ($oldInterval = $this->GetValue('INTERVAL')) {
+        if ($oldInterval = @$this->GetValue('INTERVAL')) {
             IPS_DeleteEvent($oldInterval);
         }
     }
