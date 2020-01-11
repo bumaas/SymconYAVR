@@ -202,12 +202,12 @@ class YAVR extends IPSModule
 
         $this->SendDebug(__FUNCTION__, sprintf('ResponseCode: %s, result: %s', $responseCode, $result), 0);
 
-        if ($responseCode === '0') {
+        if ($responseCode === 0) {
             $this->SetStatus(self::IS_ERROR_AVR_NOT_REACHABLE);
             return false;
         }
 
-        if ($responseCode !== '200') {
+        if ($responseCode !== 200) {
             $this->SetStatus(self::IS_ERROR_OTHER);
             return false;
         }
