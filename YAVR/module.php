@@ -174,21 +174,25 @@ class YAVR extends IPSModule
         $xml .= "<{$zone}>{$partial}</{$zone}>";
         $xml .= "</YAMAHA_AV>";
         $client = curl_init();
-        curl_setopt($client, CURLOPT_URL, "http://$host:80/YamahaRemoteControl/ctrl");
+        $url = "http://$host:80/YamahaRemoteControl/ctrl";
+        curl_setopt($client, CURLOPT_URL, $url);
         curl_setopt($client, CURLOPT_USERAGENT, "SymconYAVR");
         curl_setopt($client, CURLOPT_CONNECTTIMEOUT, 5);
         curl_setopt($client, CURLOPT_TIMEOUT, 5);
         curl_setopt($client, CURLOPT_POST, true);
         curl_setopt($client, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($client, CURLOPT_POSTFIELDS, $xml);
+        $this->SendDebug(__FUNCTION__, sprintf('url: %s, postfields: %s', $url, $xml), 0);
         $result = curl_exec($client);
-        $status = curl_getinfo($client, CURLINFO_HTTP_CODE);
+        $responseCode = curl_getinfo($client, CURLINFO_RESPONSE_CODE);
         curl_close($client);
 
-        if ($status == '0') {
+        $this->SendDebug(__FUNCTION__, sprintf('ResponseCode: %s, result: %s', $responseCode, $result), 0);
+
+        if ($responseCode == '0') {
             $this->SetStatus(201);
             return false;
-        } elseif ($status != '200') {
+        } elseif ($responseCode != '200') {
             $this->SetStatus(202);
             return false;
         } else {
