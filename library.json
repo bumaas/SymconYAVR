@@ -1,12 +1,9 @@
 {
   "id": "{677E6E30-571D-45F4-B1AE-31E79EB6EF8C}",
-  "author": "Marco Scholl/bumaas",
+  "author": "Marco Scholl",
   "name": "SymconYAVR",
-  "compatibility": {
-    "version": "5.3"
-  },
-  "url": "",
-  "version": "1.1",
-  "build": 2,
-  "date": 1578672100
+  "url": "https://github.com/traxanos/SymconYAVR",
+  "version": "1.0",
+  "build": 1,
+  "date": 1578414858
 }

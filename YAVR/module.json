@@ -3,10 +3,9 @@
   "name": "YAVR",
   "type": 3,
   "vendor": "Yamaha",
-  "aliases": ["Yamaha A/V Receiver"],
+  "aliases": ["Yamaha AVR"],
   "parentRequirements": [],
   "childRequirements": [],
   "implemented": [],
-  "prefix": "YAVR",
-  "url":    "https://github.com/bumaas/SymconYAVR/blob/master/README.md"
+  "prefix": "YAVR"
 }

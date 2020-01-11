@@ -21,7 +21,7 @@ SymconYAVR ist eine Erweiterung für die Heimautomatisierung IP Symcon. Mithilfe
 
 ### 2. Voraussetzungen
 
-- IP-Symcon ab Version 5.3
+- IP-Symcon ab Version 4.0
 - Yamaha A/V-Receiver mit Netzwerkschnittstelle
 
 ### 3. Software-Installation
@@ -40,6 +40,8 @@ Name                          | Beschreibung
 Host                          | Die IP-Adresse des Yamaha-Receiver
 Zone                          | Auswahl der Zone
 Interval                      | In welchem Abstand soll der Abgleich stattfinden. (in Sekunden)
+Button "Einschalten"          | Schaltet den Receiver ein.
+Button "Standby"              | Schaltet den Receiver in den Standby.
 Button "Szenen neu erstellen" | Erstellt das Profil für die Szenen neu.
 Button "Inputs neu erstellen" | Erstellt das Profil für die Inputs neu.
 Button "Status abgleichen"    | Gleicht den Status ab.
@@ -72,6 +74,16 @@ YAVR.Volume         | Float     | Profile für die Lautstärke von -80,0 bis 16,
 
 ### 7. PHP-Befehlsreferenz
 
+`YAVR_SetMute(integer $InstanzID, boolean $Value);`
+Schaltet den Receiver mit der InstanzID $InstanzID auf den Wert $Value (true = An; false = Standby).  
+Die Funktion liefert keinerlei Rückgabewert.  
+`YAVR_SetState(12345, true);`
+
+`YAVR_SetMute(integer $InstanzID, boolean $Value);`
+Schaltet den Receiver Mute mit der InstanzID $InstanzID auf den Wert $Value (true = Stumm; false = Normal).  
+Die Funktion liefert keinerlei Rückgabewert.  
+`YAVR_SetMute(12345, true);`
+
 `YAVR_SetScene(integer $InstanzID, string $Szene);`
 Aktiviert für den Receiver mit der InstanzID $InstanzID die Szene $Szene (Aktuell gibt es nur "Scene 1-4").  
 Die Funktion liefert keinerlei Rückgabewert.  
@@ -81,6 +93,11 @@ Die Funktion liefert keinerlei Rückgabewert.
 Aktiviert für den Receiver mit der InstanzID $InstanzID auf den Eingang $Input (Es muss der Interne Name des Receivers sein z.B. HDMI1).  
 Die Funktion liefert keinerlei Rückgabewert.  
 `YAVR_SetInput(12345, 'HDMI1');`
+
+`YAVR_SetVolume(integer $InstanzID, float $Volume);`
+Stellt für den Receiver mit der InstanzID $InstanzID die Lautstärke auf $Volume (-80.0 bis 16.0 in 0.5er Schritten).  
+Die Funktion liefert keinerlei Rückgabewert.  
+`YAVR_SetInput(12345, 25.5);`
 
 `YAVR_RequestData(integer $InstanzID);`
 Gleicht den Status ab mit der InstanzID $InstanzID.
