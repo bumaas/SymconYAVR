@@ -25,7 +25,7 @@ class YAVR extends IPSModule
 
         $this->RegisterTimer('Update', 0, 'YAVR_RequestData($_IPS[\'TARGET\'], 0);');
 
-        if ($oldInterval = @$this->GetIDForIdent('INTERVAL')) {
+        if ($oldInterval = $this->GetValue('INTERVAL')) {
             IPS_DeleteEvent($oldInterval);
         }
     }
@@ -84,9 +84,11 @@ class YAVR extends IPSModule
 
         $this->RegisterVariableBoolean('STATE', 'Zustand', '~Switch', 1);
         $this->EnableAction('STATE');
+
         $muteId = $this->RegisterVariableBoolean('MUTE', 'Mute', '~Switch', 3);
         IPS_SetIcon($muteId, 'Speaker');
         $this->EnableAction('MUTE');
+
         $this->RegisterVariableFloat('VOLUME', 'Volume', 'Volume.YAVR', 2);
         $this->EnableAction('VOLUME');
 
@@ -163,15 +165,15 @@ class YAVR extends IPSModule
         }
         $data = $data->Basic_Status;
         $power = $data->Power_Control->Power == 'On';
-        SetValueBoolean($this->GetIDForIdent('STATE'), $power);
-        if ($inputId = @$this->GetIDForIdent('INPUT')) {
+        $this->SetValue('STATE', $power);
+        if ($inputId = $this->GetValue('INPUT')) {
             $input = (string)$data->Input->Input_Sel;
             SetValueInteger($inputId, $this->GetInputId($input));
         }
         $volume = round($data->Volume->Lvl->Val / 10, 1);
-        SetValueFloat($this->GetIDForIdent('VOLUME'), $volume);
+        $this->SetValue('VOLUME', $volume);
         $mute = $data->Volume->Mute == 'On';
-        SetValueBoolean($this->GetIDForIdent('MUTE'), $mute);
+        $this->SetValue('MUTE', $mute);
         return $data;
     }
 
@@ -188,8 +190,8 @@ class YAVR extends IPSModule
         $url = "http://$host:80/YamahaRemoteControl/ctrl";
         curl_setopt($client, CURLOPT_URL, "http://$host:80/YamahaRemoteControl/ctrl");
         curl_setopt($client, CURLOPT_USERAGENT, 'SymconYAVR');
-        curl_setopt($client, CURLOPT_CONNECTTIMEOUT, 5);
-        curl_setopt($client, CURLOPT_TIMEOUT, 5);
+        curl_setopt($client, CURLOPT_CONNECTTIMEOUT, 2);
+        curl_setopt($client, CURLOPT_TIMEOUT, 2);
         curl_setopt($client, CURLOPT_POST, true);
         curl_setopt($client, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($client, CURLOPT_POSTFIELDS, $xml);
@@ -251,7 +253,7 @@ class YAVR extends IPSModule
         if ($volume > 16) {
             $volume = -20;
         } // dont use maximum 16 - if wrong parameter it will not be to loud
-        SetValueFloat($this->GetIDForIdent('VOLUME'), $volume);
+        $this->SetValue('VOLUME', $volume);
         $volume *= 10;
         return $this->Request("<Volume><Lvl><Val>{$volume}</Val><Exp>1</Exp><Unit>dB</Unit></Lvl></Volume>", 'PUT');
     }
