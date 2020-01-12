@@ -267,10 +267,10 @@ class YAVR extends IPSModule
         curl_setopt($client, CURLOPT_USERAGENT, 'SymconYAVR');
         curl_setopt($client, CURLOPT_CONNECTTIMEOUT, 2);
         curl_setopt($client, CURLOPT_TIMEOUT, 2);
-        curl_setopt($client, CURLOPT_POST, $method === 'POST');
         curl_setopt($client, CURLOPT_RETURNTRANSFER, 1);
 
-        if (($method = 'PUT') && count($data)) {
+        if (($method = 'POST') && count($data)) {
+            curl_setopt($client, CURLOPT_POST, $method === 'POST');
             curl_setopt($client, CURLOPT_POSTFIELDS, $data);
             $this->SendDebug(__FUNCTION__, sprintf('url: %s, data: %s', $url, json_encode($data, JSON_THROW_ON_ERROR, 512)), 0);
         } else {
