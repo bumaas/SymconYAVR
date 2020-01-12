@@ -6,6 +6,9 @@ class YAVR extends IPSModule
     private const IS_ERROR_AVR_NOT_REACHABLE = 201;
     private const IS_ERROR_OTHER             = 202;
 
+    private const TIMER_UPDATE = 'Update';
+
+
     public function Create()
     {
         parent::Create();
@@ -23,7 +26,7 @@ class YAVR extends IPSModule
         IPS_SetVariableProfileText('Volume.YAVR', '', ' dB');
         IPS_SetVariableProfileValues('Volume.YAVR', -80, 16, 0.5);
 
-        $this->RegisterTimer('Update', 0, 'YAVR_RequestData($_IPS[\'TARGET\'], 0);');
+        $this->RegisterTimer(self::TIMER_UPDATE, 0, 'YAVR_RequestStatus($_IPS[\'TARGET\'], 0);');
 
         if ($oldInterval = @$this->GetValue('INTERVAL')) {
             IPS_DeleteEvent($oldInterval);
@@ -88,7 +91,7 @@ class YAVR extends IPSModule
         $this->EnableAction('VOLUME');
 
         $this->RequestStatus();
-        $this->SetTimerInterval('Update', $this->ReadPropertyInteger('UpdateInterval') * 1000);
+        $this->SetTimerInterval(self::TIMER_UPDATE, $this->ReadPropertyInteger('UpdateInterval') * 1000);
 
         if ($this->ReadPropertyString('Zone') !== ''){
             $this->SetSummary(sprintf('%s:%s', $this->ReadPropertyString('Host'), $this->ReadPropertyString('Zone')));
@@ -103,9 +106,9 @@ class YAVR extends IPSModule
         if (!IPS_VariableProfileExists("YAVR.Scenes{$this->InstanceID}")) {
             IPS_CreateVariableProfile("YAVR.Scenes{$this->InstanceID}", 1);
         }
-        IPS_SetVariableProfileAssociation("YAVR.Scenes{$this->InstanceID}", 0, 'Auswahl', '', 0x000000);
+        IPS_SetVariableProfileAssociation("YAVR.Scenes{$this->InstanceID}", 0, 'Auswahl', '', -1);
         foreach ($scenes as $key => $name) {
-            IPS_SetVariableProfileAssociation("YAVR.Scenes{$this->InstanceID}", $key, $name, '', 0x000000);
+            IPS_SetVariableProfileAssociation("YAVR.Scenes{$this->InstanceID}", $key, $name, '', -1);
         }
     }
 
@@ -115,9 +118,9 @@ class YAVR extends IPSModule
         if (!IPS_VariableProfileExists("YAVR.Inputs{$this->InstanceID}")) {
             IPS_CreateVariableProfile("YAVR.Inputs{$this->InstanceID}", 1);
         }
-        IPS_SetVariableProfileAssociation("YAVR.Inputs{$this->InstanceID}", 0, 'Auswahl', '', 0x000000);
+        IPS_SetVariableProfileAssociation("YAVR.Inputs{$this->InstanceID}", 0, 'Auswahl', '', -1);
         foreach ($inputs as $key => $data) {
-            IPS_SetVariableProfileAssociation("YAVR.Inputs{$this->InstanceID}", $key, $data['title'], '', 0x000000);
+            IPS_SetVariableProfileAssociation("YAVR.Inputs{$this->InstanceID}", $key, $data['title'], '', -1);
         }
     }
 
@@ -196,7 +199,7 @@ class YAVR extends IPSModule
         return $data;
     }
 
-    public function Request(string $partial, $cmd = 'GET')
+    public function Request(string $partial, string $cmd = 'GET')
     {
         $host = $this->ReadPropertyString('Host');
         $zone = $this->ReadPropertyString('Zone');
@@ -237,6 +240,46 @@ class YAVR extends IPSModule
         }
 
         return simplexml_load_string($result)->$zone;
+    }
+
+    public function RequestExtendedControl(string $partialPath, string $method, string $zone, string $jsonData): string
+    {
+        if ($jsonData !== '') {
+            $data = json_decode($jsonData, true, 512, JSON_THROW_ON_ERROR);
+        } else {
+            $data = [];
+        }
+
+        $baseURL = sprintf('http://%s/YamahaExtendedControl/v1', $this->ReadPropertyString('Host'));
+
+        $url = implode('/', [$baseURL, $zone, $partialPath]);
+
+        if (($method === 'GET') && count($data)) {
+            $url .= '/' . http_build_query($data);
+        }
+
+        $client = curl_init();
+        curl_setopt($client, CURLOPT_URL, $url);
+        curl_setopt($client, CURLOPT_USERAGENT, 'SymconYAVR');
+        curl_setopt($client, CURLOPT_CONNECTTIMEOUT, 2);
+        curl_setopt($client, CURLOPT_TIMEOUT, 2);
+        curl_setopt($client, CURLOPT_POST, $method === 'POST');
+        curl_setopt($client, CURLOPT_RETURNTRANSFER, 1);
+
+        if (($method = 'PUT') && count($data)) {
+            curl_setopt($client, CURLOPT_POSTFIELDS, $data);
+            $this->SendDebug(__FUNCTION__, sprintf('url: %s, data: %s', $url, json_encode($data, JSON_THROW_ON_ERROR, 512)), 0);
+        } else {
+            $this->SendDebug(__FUNCTION__, sprintf('url: %s', $url), 0);
+        }
+
+        $result       = curl_exec($client);
+        $responseCode = curl_getinfo($client, CURLINFO_RESPONSE_CODE);
+        curl_close($client);
+
+        $this->SendDebug(__FUNCTION__, sprintf('ResponseCode: %s, result: %s', $responseCode, $result), 0);
+
+        return $result;
     }
 
     private function SetState(bool $state)
