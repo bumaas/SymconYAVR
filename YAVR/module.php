@@ -24,6 +24,63 @@ class YAVR extends IPSModule
     //timer names
     private const TIMER_UPDATE = 'Update';
 
+    private const SOUNDPROGRAMS = [
+        1 => ['name' => 'munich_a', 'caption' => 'Munich A'],
+        2 => ['name' => 'munich_b', 'caption' => 'Munich B'],
+        3 => ['name' => 'munich', 'caption' => 'Hall in Munich'],
+        4 => ['name' => 'frankfurt', 'caption' => 'Hall in Frankfurt'],
+        5 => ['name' => 'stuttgart', 'caption' => 'Hall in Stuttgart'],
+        6 => ['name' => 'vienna', 'caption' => 'Hall in Vienna'],
+        7 => ['name' => 'amsterdam', 'caption' => 'Hall in Amsterdam'],
+        8 => ['name' => 'usa_a', 'caption' => 'USA A'],
+        9 => ['name' => 'usa_b', 'caption' => 'USA B'],
+        10 => ['name' => 'tokyo', 'caption' => 'Tokyo'],
+        11 => ['name' => 'freiburg', 'caption' => 'Church in Freiburg'],
+        12 => ['name' => 'royaumont', 'caption' => 'Church in Royaumont'],
+        13 => ['name' => 'chamber', 'caption' => 'Chamber'],
+        14 => ['name' => 'concert', 'caption' => 'Concert'],
+        15 => ['name' => 'village_gate', 'caption' => 'Village Gate'],
+        16 => ['name' => 'village_vanguard', 'caption' => 'Village Vanguard'],
+        17 => ['name' => 'warehouse_loft', 'caption' => 'Warehouse Loft'],
+        18 => ['name' => 'cellar_club', 'caption' => 'Cellar Club'],
+        19 => ['name' => 'jazz_club', 'caption' => 'Jazz Club'],
+        20 => ['name' => 'roxy_theatre', 'caption' => 'The Roxy Theatre'],
+        21 => ['name' => 'bottom_line', 'caption' => 'The Bottom Line'],
+        22 => ['name' => 'arena', 'caption' => 'Arena'],
+        23 => ['name' => 'sports', 'caption' => 'Sports'],
+        24 => ['name' => 'action_game', 'caption' => 'Action Game'],
+        25 => ['name' => 'roleplaying_game', 'caption' => 'Roleplaying Game'],
+        26 => ['name' => 'game', 'caption' => 'Game'],
+        27 => ['name' => 'music_video', 'caption' => 'Music Video'],
+        28 => ['name' => 'music', 'caption' => 'Music'],
+        29 => ['name' => 'recital_opera', 'caption' => 'Recital/Opera'],
+        30 => ['name' => 'pavilion', 'caption' => 'Pavilion'],
+        31 => ['name' => 'disco', 'caption' => 'Disco'],
+        32 => ['name' => 'standard', 'caption' => 'Standard'],
+        33 => ['name' => 'spectacle', 'caption' => 'Spectacle'],
+        34 => ['name' => 'sci-fi', 'caption' => 'Sci-Fi'],
+        35 => ['name' => 'adventure', 'caption' => 'Adventure'],
+        36 => ['name' => 'drama', 'caption' => 'Drama'],
+        37 => ['name' => 'talk_show', 'caption' => 'Talk Show'],
+        38 => ['name' => 'tv_program', 'caption' => 'TV Program'],
+        39 => ['name' => 'mono_movie', 'caption' => 'Mono Movie'],
+        40 => ['name' => 'movie', 'caption' => 'Movie'],
+        41 => ['name' => 'enhanced', 'caption' => 'Enhanced'],
+        42 => ['name' => '2ch_stereo', 'caption' => '2ch Stereo'],
+        43 => ['name' => '5ch_stereo', 'caption' => '5ch Stereo'],
+        44 => ['name' => '7ch_stereo', 'caption' => '7ch Stereo'],
+        45 => ['name' => '9ch_stereo', 'caption' => '9ch Stereo'],
+        46 => ['name' => '11ch_stereo', 'caption' => '11ch Stereo'],
+        47 => ['name' => 'stereo', 'caption' => 'Stereo'],
+        48 => ['name' => 'surr_decoder', 'caption' => 'Surround Decoder'],
+        49 => ['name' => 'my_surround', 'caption' => 'My Surround'],
+        50 => ['name' => 'target', 'caption' => 'Target'],
+        51 => ['name' => 'bass_booster', 'caption' => 'Bass Booster'],
+        52 => ['name' => 'straight', 'caption' => 'Straight'],
+        53 => ['name' => 'off', 'caption' => 'DSP Off'],
+    ];
+
+
 
     public function Create()
     {
@@ -32,9 +89,9 @@ class YAVR extends IPSModule
         $this->RegisterPropertyString(self::PROP_ZONE, 'Main_Zone');
         $this->RegisterPropertyInteger(self::PROP_UPDATEINTERVAL, 5);
 
-        $this->RegisterAttributeString(self::ATTR_INPUTSMAPPING, '');
-        $this->RegisterAttributeString(self::ATTR_SCENESMAPPING, '');
-        $this->RegisterAttributeString(self::ATTR_SOUNDPROGRAMSSMAPPING, '');
+        $this->RegisterAttributeString(self::ATTR_INPUTSMAPPING, json_encode([], JSON_THROW_ON_ERROR, 512));
+        $this->RegisterAttributeString(self::ATTR_SCENESMAPPING, json_encode([], JSON_THROW_ON_ERROR, 512));
+        $this->RegisterAttributeString(self::ATTR_SOUNDPROGRAMSSMAPPING, json_encode([], JSON_THROW_ON_ERROR, 512));
 
         if (!IPS_VariableProfileExists('Volume.YAVR')) {
             IPS_CreateVariableProfile('Volume.YAVR', 2);
@@ -66,6 +123,10 @@ class YAVR extends IPSModule
     {
         $inputs = json_decode($this->ReadAttributeString(self::ATTR_INPUTSMAPPING), true, 512, JSON_THROW_ON_ERROR);
 
+        if (count($inputs) === 0){
+            return null;
+        }
+
         foreach ($inputs as $id => $data) {
             if ($value === $data['id']) {
                 return $id;
@@ -79,6 +140,11 @@ class YAVR extends IPSModule
     private function GetInputKey(int $value): ?string
     {
         $inputs = json_decode($this->ReadAttributeString(self::ATTR_INPUTSMAPPING), true, 512, JSON_THROW_ON_ERROR);
+
+        if (count($inputs) === 0){
+            return null;
+        }
+
         if (isset($inputs[$value])) {
             return $inputs[$value]['id'];
         }
@@ -119,7 +185,7 @@ class YAVR extends IPSModule
             $this->SetSummary($this->ReadPropertyString(self::PROP_HOST));
         }
 
-        if ($this->GetStatus() === IS_ACTIVE){
+        if ($this->GetStatus() === IS_ACTIVE) {
             $this->UpdateScenes();
             $this->UpdateInputs();
             $this->UpdateSoundPrograms();
@@ -144,8 +210,12 @@ class YAVR extends IPSModule
             IPS_CreateVariableProfile("YAVR.SoundPrograms{$this->InstanceID}", VARIABLETYPE_INTEGER);
         }
         IPS_SetVariableProfileAssociation("YAVR.SoundPrograms{$this->InstanceID}", 0, 'Auswahl', '', -1);
-        foreach ($soundPrograms as $key => $soundProgram) {
-            IPS_SetVariableProfileAssociation("YAVR.SoundPrograms{$this->InstanceID}", $key + 1, $soundProgram, '', -1);
+        foreach ($soundPrograms as $soundProgram) {
+            foreach (self::SOUNDPROGRAMS as $key => $item) {
+                if ($soundProgram === $item['name']) {
+                    IPS_SetVariableProfileAssociation("YAVR.SoundPrograms{$this->InstanceID}", $key, $item['caption'], '', -1);
+                }
+            }
         }
     }
 
@@ -166,6 +236,9 @@ class YAVR extends IPSModule
         switch ($ident) {
             case self::VAR_STATE:
                 $this->SetState($value);
+                break;
+            case self::VAR_SOUNDPROGRAM:
+                $this->SetSoundProgram($value);
                 break;
             case 'SCENE':
                 if ($value > 0) {
@@ -330,6 +403,20 @@ class YAVR extends IPSModule
         return $this->Request("<Power_Control><Power>{$power}</Power></Power_Control>", 'PUT');
     }
 
+    private function SetSoundProgram(int $soundProgram)
+    {
+        $YECSoundProgram = self::SOUNDPROGRAMS[$soundProgram]['name'];
+        if ($soundProgram === 0) {
+            $this->SetValue(self::VAR_SOUNDPROGRAM, $soundProgram);
+            return;
+        }
+
+        $ret = $this->RequestExtendedControl('setSoundProgram', 'GET', $this->GetYECZoneName(), json_encode(['program' => $YECSoundProgram]));
+        if (json_decode($ret, true)['response_code'] === 0) {
+            $this->SetValue(self::VAR_SOUNDPROGRAM, $soundProgram);
+        }
+    }
+
     private function SetMute(bool $state)
     {
         $this->SetValue('MUTE', $state);
@@ -420,8 +507,8 @@ class YAVR extends IPSModule
 
     private function UpdateSoundPrograms(): bool
     {
-        $data   = $this->RequestExtendedControl('getSoundProgramList', 'GET', $this->GetYECZoneName(), '');
-        $data   = json_decode($data, true, 512, JSON_THROW_ON_ERROR);
+        $data = $this->RequestExtendedControl('getSoundProgramList', 'GET', $this->GetYECZoneName(), '');
+        $data = json_decode($data, true, 512, JSON_THROW_ON_ERROR);
         if ($data['response_code'] !== 0) {
             return false;
         }
