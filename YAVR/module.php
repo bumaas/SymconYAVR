@@ -252,10 +252,14 @@ class YAVR extends IPSModule
 
         $baseURL = sprintf('http://%s/YamahaExtendedControl/v1', $this->ReadPropertyString('Host'));
 
-        $url = implode('/', [$baseURL, $zone, $partialPath]);
+        if ($zone !== ''){
+            $url = implode('/', [$baseURL, $zone, $partialPath]);
+        } else {
+            $url = implode('/', [$baseURL, $partialPath]);
+        }
 
         if (($method === 'GET') && count($data)) {
-            $url .= '/' . http_build_query($data);
+            $url .= '?' . http_build_query($data);
         }
 
         $client = curl_init();
