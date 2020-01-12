@@ -1,14 +1,16 @@
 {
-  "elements": [{
-      "name": "Host",
-      "type": "ValidationTextBox",
+  "elements": [
+    {
+      "name":    "Host",
+      "type":    "ValidationTextBox",
       "caption": "Host"
     },
     {
-      "name": "Zone",
-      "type": "Select",
+      "name":    "Zone",
+      "type":    "Select",
       "caption": "Zone",
-      "options": [{
+      "options": [
+        {
           "label": "Main_Zone",
           "value": "Main_Zone"
         },
@@ -27,39 +29,30 @@
       ]
     },
     {
-      "name": "UpdateInterval",
-      "type": "IntervalBox",
+      "name":    "UpdateInterval",
+      "type":    "IntervalBox",
       "caption": "Sekunden"
     }
   ],
-  "actions": [
+  "actions":  [
     {
-      "type": "Button",
-      "label": "Szenen neu erstellen",
-      "onClick": "print_r(YAVR_UpdateScenes($id));"
-    },
-    {
-      "type": "Button",
-      "label": "Inputs neu erstellen",
-      "onClick": "print_r(YAVR_UpdateInputs($id));"
-    },
-    {
-      "type": "Button",
-      "label": "Status abgleichen",
+      "type":    "Button",
+      "label":   "Status abgleichen",
       "onClick": "print_r(YAVR_RequestStatus($id));"
     },
     {
-      "type": "TestCenter"}
+      "type": "TestCenter"
+    }
   ],
-  "status": [
+  "status":   [
     {
-      "code": 201,
-      "icon": "error",
+      "code":    201,
+      "icon":    "error",
       "caption": "Receiver ist nicht erreichbar."
     },
     {
-      "code": 202,
-      "icon": "error",
+      "code":    202,
+      "icon":    "error",
       "caption": "Unbekannter Fehler ist aufgetreten."
     }
   ]
