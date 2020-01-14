@@ -12,10 +12,12 @@ class YAVR extends IPSModule
     private const PROP_UPDATEINTERVAL = 'UpdateInterval';
 
     //attribute names
-    private const ATTR_INPUTSMAPPING        = 'InputsMapping';
-    private const ATTR_SCENESMAPPING        = 'ScenesMapping';
+    private const ATTR_INPUTSMAPPING = 'InputsMapping';
+    private const ATTR_SCENESMAPPING = 'ScenesMapping';
 
     //status variable names
+    private const VAR_SCENE           = 'Scene';
+    private const VAR_INPUT           = 'Input';
     private const VAR_STATE           = 'State';
     private const VAR_MUTE            = 'Mute';
     private const VAR_VOLUME          = 'Volume';
@@ -25,11 +27,11 @@ class YAVR extends IPSModule
     private const VAR_ENHANCER        = 'Enhancer';
     private const VAR_TONECONTROL     = 'ToneControl';
     private const VAR_BASS            = 'Bass';
-    private const VAR_TREBLE        = 'Treble';
-    private const VAR_DIALOGUELEVEL = 'DialogueLevel';
-    private const VAR_DIALOGUELIFT  = 'DialogueLift';
+    private const VAR_TREBLE          = 'Treble';
+    private const VAR_DIALOGUELEVEL   = 'DialogueLevel';
+    private const VAR_DIALOGUELIFT    = 'DialogueLift';
     private const VAR_SUBWOOFERVOLUME = 'SubwooferVolume';
-    private const VAR_SURROUNDAI = 'SurroundAI';
+    private const VAR_SURROUNDAI      = 'SurroundAI';
 
 
     //timer names
@@ -113,7 +115,7 @@ class YAVR extends IPSModule
 
         //Bass Profile
         if (!IPS_VariableProfileExists('YAVR.Bass')) {
-            IPS_CreateVariableProfile('YAVR.Bass', VARIABLETYPE_FLOAT);
+            IPS_CreateVariableProfile('YAVR.Bass', VARIABLETYPE_INTEGER);
         }
         IPS_SetVariableProfileDigits('YAVR.Bass', 1);
         IPS_SetVariableProfileIcon('YAVR.Bass', 'Intensity');
@@ -122,7 +124,7 @@ class YAVR extends IPSModule
 
         //Treble Profile
         if (!IPS_VariableProfileExists('YAVR.Treble')) {
-            IPS_CreateVariableProfile('YAVR.Treble', VARIABLETYPE_FLOAT);
+            IPS_CreateVariableProfile('YAVR.Treble', VARIABLETYPE_INTEGER);
         }
         IPS_SetVariableProfileDigits('YAVR.Treble', 1);
         IPS_SetVariableProfileIcon('YAVR.Treble', 'Intensity');
@@ -200,7 +202,7 @@ class YAVR extends IPSModule
         $this->RegisterVariableBoolean(self::VAR_ENHANCER, 'Enhancer', '~Switch', 0);
         $this->EnableAction(self::VAR_ENHANCER);
 
-        $this->RegisterVariableBoolean(self::VAR_TONECONTROL, 'Enhancer', '~Switch', 0);
+        $this->RegisterVariableBoolean(self::VAR_TONECONTROL, 'ToneControl', '~Switch', 0);
         $this->EnableAction(self::VAR_TONECONTROL);
 
         $this->RegisterVariableFloat(self::VAR_VOLUME, 'Volume', 'YAVR.Volume', 0);
@@ -242,17 +244,18 @@ class YAVR extends IPSModule
         $this->UpdateProfiles();
     }
 
-    private function UpdateProfiles():void
+    private function UpdateProfiles(): void
     {
         $Features = $this->RequestExtendedControlList('getFeatures', 'GET', '', '');
 
-        if ($Features['response_code'] !== 0){
+        if ($Features['response_code'] !== 0) {
             return;
         }
 
         //dimmer
         //foreach ($Features['system']['zone'][$this->getZoneIndex()])
     }
+
     private function UpdateScenesProfile(): void
     {
         $scenes = json_decode($this->ReadAttributeString(self::ATTR_SCENESMAPPING), true, 512, JSON_THROW_ON_ERROR);
@@ -298,14 +301,14 @@ class YAVR extends IPSModule
                 $this->SetState($value);
                 break;
             case self::VAR_SOUNDPROGRAM:
-                if ($this->SetSoundProgram($value)){
+                if ($this->SetSoundProgram($value)) {
                     $this->SetValue($ident, $value);
                 }
                 break;
-            case 'SCENE':
+            case self::VAR_SCENE:
                 $this->SetScene("Scene $value");
                 break;
-            case 'INPUT':
+            case self::VAR_INPUT:
                 $this->SetInput($this->GetInputKey($value));
                 break;
             case self::VAR_MUTE:
@@ -315,52 +318,55 @@ class YAVR extends IPSModule
                 $this->SetVolume($value);
                 break;
             case self::VAR_PARTYMODE:
-                if ($this->SetZoneParameter('setPartyMode', ['enable'=> $value])){
+                if ($this->SetZoneParameter('setPartyMode', ['enable' => $value])) {
                     $this->SetValue($ident, $value);
                 }
                 break;
             case self::VAR_PUREDIRECT:
-                if ($this->SetZoneParameter('setPureDirect', ['enable'=> $value])){
+                if ($this->SetZoneParameter('setPureDirect', ['enable' => $value])) {
                     $this->SetValue($ident, $value);
                 }
                 break;
             case self::VAR_ENHANCER:
-                if ($this->SetZoneParameter('setEnhancer', ['enable'=> $value])){
+                if ($this->SetZoneParameter('setEnhancer', ['enable' => $value])) {
                     $this->SetValue($ident, $value);
                 }
                 break;
             case self::VAR_TONECONTROL:
-                if ($this->SetZoneParameter('setToneControl', ['enable'=> $value])){
+                if ($this->SetZoneParameter('setToneControl', ['enable' => $value])) {
                     $this->SetValue($ident, $value);
                 }
                 break;
             case self::VAR_BASS:
-                if ($this->SetZoneParameter('setToneControl', ['mode'=> 'manual', 'bass' => $value, 'treble' => $this->GetValue(self::VAR_TREBLE)])){
+                if ($this->SetZoneParameter(
+                    'setToneControl',
+                    ['mode' => 'manual', 'bass' => $value, 'treble' => $this->GetValue(self::VAR_TREBLE)]
+                )) {
                     $this->SetValue($ident, $value);
                 }
                 break;
             case self::VAR_TREBLE:
-                if ($this->SetZoneParameter('setToneControl', ['mode'=> 'manual', 'treble' => $value, 'bass' => $this->GetValue(self::VAR_BASS)])){
+                if ($this->SetZoneParameter('setToneControl', ['mode' => 'manual', 'treble' => $value, 'bass' => $this->GetValue(self::VAR_BASS)])) {
                     $this->SetValue($ident, $value);
                 }
                 break;
             case self::VAR_DIALOGUELEVEL:
-                if ($this->SetZoneParameter('setDialogueLevel', ['value'=> $value])){
+                if ($this->SetZoneParameter('setDialogueLevel', ['value' => $value])) {
                     $this->SetValue($ident, $value);
                 }
                 break;
             case self::VAR_DIALOGUELIFT:
-                if ($this->SetZoneParameter('setDialogueLift', ['value'=> $value])){
+                if ($this->SetZoneParameter('setDialogueLift', ['value' => $value])) {
                     $this->SetValue($ident, $value);
                 }
                 break;
             case self::VAR_SUBWOOFERVOLUME:
-                if ($this->SetZoneParameter('setSubwooferVolume', ['volume'=> $value])){
+                if ($this->SetZoneParameter('setSubwooferVolume', ['volume' => $value])) {
                     $this->SetValue($ident, $value);
                 }
                 break;
             case self::VAR_SURROUNDAI:
-                if ($this->SetZoneParameter('setSurroundAI', ['enable'=> $value])){
+                if ($this->SetZoneParameter('setSurroundAI', ['enable' => $value])) {
                     $this->SetValue($ident, $value);
                 }
                 break;
@@ -406,7 +412,7 @@ class YAVR extends IPSModule
 
         $inputId = $this->GetInputId((string)$remoteControl_BasicStatus->Basic_Status->Input->Input_Sel);
         if ($inputId !== null) {
-            $this->SetValue('INPUT', $inputId);
+            $this->SetValue(self::VAR_INPUT, $inputId);
         }
 
         $this->SetValue(self::VAR_VOLUME, round($remoteControl_BasicStatus->Basic_Status->Volume->Lvl->Val / 10, 1));
@@ -527,19 +533,22 @@ class YAVR extends IPSModule
         return $this->Request("<Power_Control><Power>{$power}</Power></Power_Control>", 'PUT');
     }
 
-    private function SetZoneParameter(string $partialPath, array $values):bool
+    private function SetZoneParameter(string $partialPath, array $values): bool
     {
         $json = $this->RequestExtendedControl($partialPath, 'GET', $this->GetYECZoneName(), json_encode($values, JSON_THROW_ON_ERROR, 512));
 
         return !(($json === false) || json_decode($json, true, 512, JSON_THROW_ON_ERROR)['response_code'] !== 0);
     }
 
-    private function SetSoundProgram(int $soundProgram):bool
+    private function SetSoundProgram(int $soundProgram): bool
     {
         $YECSoundProgram = self::SOUNDPROGRAMS[$soundProgram]['name'];
 
-        return $this->RequestExtendedControlList('setSoundProgram', 'GET', $this->GetYECZoneName(),
-                                                 json_encode(['program' => $YECSoundProgram], JSON_THROW_ON_ERROR, 512)
+        return $this->RequestExtendedControlList(
+                'setSoundProgram',
+                'GET',
+                $this->GetYECZoneName(),
+                json_encode(['program' => $YECSoundProgram], JSON_THROW_ON_ERROR, 512)
             )['response_code'] === 0;
     }
 
@@ -557,7 +566,7 @@ class YAVR extends IPSModule
 
     public function SetInput(string $input)
     {
-        $this->SetValue('INPUT', $this->GetInputId($input));
+        $this->SetValue(self::VAR_INPUT, $this->GetInputId($input));
         return $this->Request("<Input><Input_Sel>{$input}</Input_Sel></Input>", 'PUT');
     }
 
@@ -620,8 +629,8 @@ class YAVR extends IPSModule
         $this->WriteAttributeString(self::ATTR_SCENESMAPPING, json_encode($result, JSON_THROW_ON_ERROR, 512));
         $this->UpdateScenesProfile();
 
-        $sceneId = $this->RegisterVariableInteger('SCENE', 'Szene', "YAVR.Scenes{$this->InstanceID}", 8);
-        $this->EnableAction('SCENE');
+        $sceneId = $this->RegisterVariableInteger(self::VAR_SCENE, 'Szene', "YAVR.Scenes{$this->InstanceID}", 8);
+        $this->EnableAction(self::VAR_SCENE);
         IPS_SetIcon($sceneId, 'HollowArrowRight');
 
         $resultText = "ID\tName\n";
@@ -703,8 +712,8 @@ class YAVR extends IPSModule
 
         $this->UpdateInputsProfile();
 
-        $inputId = $this->RegisterVariableInteger('INPUT', 'Eingang', "YAVR.Inputs{$this->InstanceID}", 9);
-        $this->EnableAction('INPUT');
+        $inputId = $this->RegisterVariableInteger(self::VAR_INPUT, 'Eingang', "YAVR.Inputs{$this->InstanceID}", 9);
+        $this->EnableAction(self::VAR_INPUT);
         IPS_SetIcon($inputId, 'ArrowRight');
 
         $resultText = "Symcon ID\tAVR Param\t\tTitel\n";
