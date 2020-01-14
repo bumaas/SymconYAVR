@@ -345,22 +345,22 @@ class YAVR extends IPSModule
                 $this->SetVolume($value);
                 break;
             case self::VAR_PARTYMODE:
-                if ($this->SetZoneParameter('setPartyMode', ['enable' => $value])) {
+                if ($this->SetZoneParameter('setPartyMode', ['enable' => $value?'true':'false'])) {
                     $this->SetValue($ident, $value);
                 }
                 break;
             case self::VAR_PUREDIRECT:
-                if ($this->SetZoneParameter('setPureDirect', ['enable' => $value])) {
+                if ($this->SetZoneParameter('setPureDirect', ['enable' => $value?'true':'false'])) {
                     $this->SetValue($ident, $value);
                 }
                 break;
             case self::VAR_ENHANCER:
-                if ($this->SetZoneParameter('setEnhancer', ['enable' => $value])) {
+                if ($this->SetZoneParameter('setEnhancer', ['enable' => $value?'true':'false'])) {
                     $this->SetValue($ident, $value);
                 }
                 break;
             case self::VAR_TONECONTROL:
-                if ($this->SetZoneParameter('setToneControl', ['enable' => $value])) {
+                if ($this->SetZoneParameter('setToneControl', ['enable' => $value?'true':'false'])) {
                     $this->SetValue($ident, $value);
                 }
                 break;
@@ -393,7 +393,7 @@ class YAVR extends IPSModule
                 }
                 break;
             case self::VAR_SURROUNDAI:
-                if ($this->SetZoneParameter('setSurroundAI', ['enable' => $value])) {
+                if ($this->SetZoneParameter('setSurroundAI', ['enable' => $value?'true':'false'])) {
                     $this->SetValue($ident, $value);
                 }
                 break;
@@ -402,7 +402,7 @@ class YAVR extends IPSModule
         }
     }
 
-    public function RequestStatus()
+    public function RequestStatus():bool
     {
         $remoteControl_BasicStatus = $this->Request('<Basic_Status>GetParam</Basic_Status>', 'GET');
         if ($remoteControl_BasicStatus === false) {
@@ -446,9 +446,7 @@ class YAVR extends IPSModule
 
         $this->SetValue(self::VAR_MUTE, $remoteControl_BasicStatus->Basic_Status->Volume->Mute == 'On');
 
-        $extendedControl_Status = $this->RequestExtendedControlList('getStatus', 'GET', $this->GetYECZoneName(), '');
-
-        return [$remoteControl_BasicStatus, $extendedControl_Status];
+        return !($this->RequestExtendedControlList('getStatus', 'GET', $this->GetYECZoneName(), '') === null);
     }
 
     public function Request(string $partial, string $cmd = 'GET')
