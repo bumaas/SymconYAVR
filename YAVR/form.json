@@ -53,7 +53,7 @@
     {
       "code":    202,
       "icon":    "error",
-      "caption": "Unbekannter Fehler ist aufgetreten."
+      "caption": "Ein allgemeiner Fehler ist aufgetreten."
     }
   ]
 }
