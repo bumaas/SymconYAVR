@@ -131,6 +131,33 @@ class YAVR extends IPSModule
         IPS_SetVariableProfileText('YAVR.Treble', '', '');
         IPS_SetVariableProfileValues('YAVR.Treble', -12, 12, 1);
 
+        //DialogueLevel Profile
+        if (!IPS_VariableProfileExists('YAVR.DialogueLevel')) {
+            IPS_CreateVariableProfile('YAVR.DialogueLevel', VARIABLETYPE_INTEGER);
+        }
+        IPS_SetVariableProfileDigits('YAVR.DialogueLevel', 1);
+        IPS_SetVariableProfileIcon('YAVR.DialogueLevel', 'Intensity');
+        IPS_SetVariableProfileText('YAVR.DialogueLevel', '', '');
+        IPS_SetVariableProfileValues('YAVR.DialogueLevel', 0, 3, 1);
+
+        //DialogueLift Profile
+        if (!IPS_VariableProfileExists('YAVR.DialogueLift')) {
+            IPS_CreateVariableProfile('YAVR.DialogueLift', VARIABLETYPE_INTEGER);
+        }
+        IPS_SetVariableProfileDigits('YAVR.DialogueLift', 1);
+        IPS_SetVariableProfileIcon('YAVR.DialogueLift', 'Intensity');
+        IPS_SetVariableProfileText('YAVR.DialogueLift', '', '');
+        IPS_SetVariableProfileValues('YAVR.DialogueLift', 0, 5, 1);
+
+        //SubwooferVolume Profile
+        if (!IPS_VariableProfileExists('YAVR.SubwooferVolume')) {
+            IPS_CreateVariableProfile('YAVR.SubwooferVolume', VARIABLETYPE_INTEGER);
+        }
+        IPS_SetVariableProfileDigits('YAVR.SubwooferVolume', 1);
+        IPS_SetVariableProfileIcon('YAVR.SubwooferVolume', 'Intensity');
+        IPS_SetVariableProfileText('YAVR.SubwooferVolume', '', '');
+        IPS_SetVariableProfileValues('YAVR.SubwooferVolume', -12, 12, 1);
+
         $this->RegisterTimer(self::TIMER_UPDATE, 0, 'YAVR_RequestStatus($_IPS[\'TARGET\'], 0);');
 
         if ($oldInterval = @$this->GetValue('INTERVAL')) {
