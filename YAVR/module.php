@@ -370,7 +370,7 @@ class YAVR extends IPSModule
             case self::VAR_BASS:
                 if ($this->SetZoneParameter(
                     'setToneControl',
-                    ['mode' => 'manual', 'bass' => (int)($value * 2), 'treble' => (int)($this->GetValue(self::VAR_TREBLE)) * 2]
+                    ['mode' => 'manual', 'bass' => (int)($value * 2), 'treble' => $this->GetValue(self::VAR_TREBLE) * 2]
                 )) {
                     $this->SetValue($ident, $value);
                 }
@@ -378,7 +378,7 @@ class YAVR extends IPSModule
             case self::VAR_TREBLE:
                 if ($this->SetZoneParameter(
                     'setToneControl',
-                    ['mode' => 'manual', 'treble' => (int)($value * 2), 'bass' => (int)($this->GetValue(self::VAR_BASS) * 2)]
+                    ['mode' => 'manual', 'treble' => (int)($value * 2), 'bass' => $this->GetValue(self::VAR_BASS) * 2]
                 )) {
                     $this->SetValue($ident, $value);
                 }
@@ -459,11 +459,11 @@ class YAVR extends IPSModule
             return false;
         }
 
-        $this->SetValue(self::VAR_PARTYMODE, $remoteControl_ExtendedControlList['party_enable'] === 'true');
+        $this->SetValue(self::VAR_PARTYMODE, $remoteControl_ExtendedControlList['party_enable']);
 
-        $this->SetValue(self::VAR_PUREDIRECT, $remoteControl_ExtendedControlList['pure_direct'] === 'true');
+        $this->SetValue(self::VAR_PUREDIRECT, $remoteControl_ExtendedControlList['pure_direct']);
 
-        $this->SetValue(self::VAR_ENHANCER, $remoteControl_ExtendedControlList['enhancer'] === 'true');
+        $this->SetValue(self::VAR_ENHANCER, $remoteControl_ExtendedControlList['enhancer']);
 
         $this->SetValue(self::VAR_TONECONTROL, $remoteControl_ExtendedControlList['tone_control']['mode'] === 'manual');
 
@@ -477,7 +477,7 @@ class YAVR extends IPSModule
 
         $this->SetValue(self::VAR_SUBWOOFERVOLUME, $remoteControl_ExtendedControlList['subwoofer_volume'] / 2);
 
-        $this->SetValue(self::VAR_SURROUNDAI, $remoteControl_ExtendedControlList['surround_ai'] === 'true');
+        $this->SetValue(self::VAR_SURROUNDAI, $remoteControl_ExtendedControlList['surround_ai']);
 
         $this->SetValue(self::VAR_SOUNDPROGRAM, $this->getSoundProgramByName($remoteControl_ExtendedControlList['sound_program']));
 
@@ -616,7 +616,7 @@ class YAVR extends IPSModule
 
     private function SetSystemParameter(string $partialPath, array $values): bool
     {
-        $json = $this->RequestExtendedControl($partialPath, 'GET', '', json_encode($values, JSON_THROW_ON_ERROR, 512));
+        $json = $this->RequestExtendedControl($partialPath, 'GET', 'system', json_encode($values, JSON_THROW_ON_ERROR, 512));
 
         return !(($json === false) || json_decode($json, true, 512, JSON_THROW_ON_ERROR)['response_code'] !== 0);
     }
