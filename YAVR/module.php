@@ -115,21 +115,23 @@ class YAVR extends IPSModule
 
         //Bass Profile
         if (!IPS_VariableProfileExists('YAVR.Bass')) {
-            IPS_CreateVariableProfile('YAVR.Bass', VARIABLETYPE_INTEGER);
+            IPS_CreateVariableProfile('YAVR.Bass', VARIABLETYPE_FLOAT);
         }
         IPS_SetVariableProfileDigits('YAVR.Bass', 1);
         IPS_SetVariableProfileIcon('YAVR.Bass', 'Intensity');
+        IPS_SetVariableProfileText('YAVR.Bass', '', ' dB');
         IPS_SetVariableProfileText('YAVR.Bass', '', '');
-        IPS_SetVariableProfileValues('YAVR.Bass', -12, 12, 1);
+        IPS_SetVariableProfileValues('YAVR.Bass', -6, 6, 0.5);
 
         //Treble Profile
         if (!IPS_VariableProfileExists('YAVR.Treble')) {
-            IPS_CreateVariableProfile('YAVR.Treble', VARIABLETYPE_INTEGER);
+            IPS_CreateVariableProfile('YAVR.Treble', VARIABLETYPE_FLOAT);
         }
         IPS_SetVariableProfileDigits('YAVR.Treble', 1);
         IPS_SetVariableProfileIcon('YAVR.Treble', 'Intensity');
+        IPS_SetVariableProfileText('YAVR.Treble', '', ' dB');
         IPS_SetVariableProfileText('YAVR.Treble', '', '');
-        IPS_SetVariableProfileValues('YAVR.Treble', -12, 12, 1);
+        IPS_SetVariableProfileValues('YAVR.Treble', -6, 6, 0.5);
 
         //DialogueLevel Profile
         if (!IPS_VariableProfileExists('YAVR.DialogueLevel')) {
@@ -151,12 +153,13 @@ class YAVR extends IPSModule
 
         //SubwooferVolume Profile
         if (!IPS_VariableProfileExists('YAVR.SubwooferVolume')) {
-            IPS_CreateVariableProfile('YAVR.SubwooferVolume', VARIABLETYPE_INTEGER);
+            IPS_CreateVariableProfile('YAVR.SubwooferVolume', VARIABLETYPE_FLOAT);
         }
         IPS_SetVariableProfileDigits('YAVR.SubwooferVolume', 1);
         IPS_SetVariableProfileIcon('YAVR.SubwooferVolume', 'Intensity');
+        IPS_SetVariableProfileText('YAVR.SubwooferVolume', '', ' dB');
         IPS_SetVariableProfileText('YAVR.SubwooferVolume', '', '');
-        IPS_SetVariableProfileValues('YAVR.SubwooferVolume', -12, 12, 1);
+        IPS_SetVariableProfileValues('YAVR.SubwooferVolume', -6, 6, 0.5);
 
         $this->RegisterTimer(self::TIMER_UPDATE, 0, 'YAVR_RequestStatus($_IPS[\'TARGET\'], 0);');
 
@@ -235,10 +238,10 @@ class YAVR extends IPSModule
         $this->RegisterVariableFloat(self::VAR_VOLUME, 'Volume', 'YAVR.Volume', 0);
         $this->EnableAction(self::VAR_VOLUME);
 
-        $this->RegisterVariableInteger(self::VAR_BASS, 'Bass', 'YAVR.Bass', 0);
+        $this->RegisterVariableFloat(self::VAR_BASS, 'Bass', 'YAVR.Bass', 0);
         $this->EnableAction(self::VAR_BASS);
 
-        $this->RegisterVariableInteger(self::VAR_TREBLE, 'Treble', 'YAVR.Treble', 0);
+        $this->RegisterVariableFloat(self::VAR_TREBLE, 'Treble', 'YAVR.Treble', 0);
         $this->EnableAction(self::VAR_TREBLE);
 
         $this->RegisterVariableInteger(self::VAR_DIALOGUELEVEL, 'Dialogue Level', 'YAVR.DialogueLevel', 0);
@@ -247,7 +250,7 @@ class YAVR extends IPSModule
         $this->RegisterVariableInteger(self::VAR_DIALOGUELIFT, 'Dialogue Lift', 'YAVR.DialogueLift', 0);
         $this->EnableAction(self::VAR_DIALOGUELIFT);
 
-        $this->RegisterVariableInteger(self::VAR_SUBWOOFERVOLUME, 'Subwoofer Volume', 'YAVR.SubwooferVolume', 0);
+        $this->RegisterVariableFloat(self::VAR_SUBWOOFERVOLUME, 'Subwoofer Volume', 'YAVR.SubwooferVolume', 0);
         $this->EnableAction(self::VAR_SUBWOOFERVOLUME);
 
         $this->RegisterVariableBoolean(self::VAR_SURROUNDAI, 'Surround AI', '~Switch', 0);
@@ -345,35 +348,38 @@ class YAVR extends IPSModule
                 $this->SetVolume($value);
                 break;
             case self::VAR_PARTYMODE:
-                if ($this->SetZoneParameter('setPartyMode', ['enable' => $value?'true':'false'])) {
+                if ($this->SetZoneParameter('setPartyMode', ['enable' => $value ? 'true' : 'false'])) {
                     $this->SetValue($ident, $value);
                 }
                 break;
             case self::VAR_PUREDIRECT:
-                if ($this->SetZoneParameter('setPureDirect', ['enable' => $value?'true':'false'])) {
+                if ($this->SetZoneParameter('setPureDirect', ['enable' => $value ? 'true' : 'false'])) {
                     $this->SetValue($ident, $value);
                 }
                 break;
             case self::VAR_ENHANCER:
-                if ($this->SetZoneParameter('setEnhancer', ['enable' => $value?'true':'false'])) {
+                if ($this->SetZoneParameter('setEnhancer', ['enable' => $value ? 'true' : 'false'])) {
                     $this->SetValue($ident, $value);
                 }
                 break;
             case self::VAR_TONECONTROL:
-                if ($this->SetZoneParameter('setToneControl', ['enable' => $value?'true':'false'])) {
+                if ($this->SetZoneParameter('setToneControl', ['enable' => $value ? 'true' : 'false'])) {
                     $this->SetValue($ident, $value);
                 }
                 break;
             case self::VAR_BASS:
                 if ($this->SetZoneParameter(
                     'setToneControl',
-                    ['mode' => 'manual', 'bass' => $value, 'treble' => $this->GetValue(self::VAR_TREBLE)]
+                    ['mode' => 'manual', 'bass' => (int)($value * 2), 'treble' => (int)($this->GetValue(self::VAR_TREBLE)) * 2]
                 )) {
                     $this->SetValue($ident, $value);
                 }
                 break;
             case self::VAR_TREBLE:
-                if ($this->SetZoneParameter('setToneControl', ['mode' => 'manual', 'treble' => $value, 'bass' => $this->GetValue(self::VAR_BASS)])) {
+                if ($this->SetZoneParameter(
+                    'setToneControl',
+                    ['mode' => 'manual', 'treble' => (int)($value * 2), 'bass' => (int)($this->GetValue(self::VAR_BASS) * 2)]
+                )) {
                     $this->SetValue($ident, $value);
                 }
                 break;
@@ -388,12 +394,12 @@ class YAVR extends IPSModule
                 }
                 break;
             case self::VAR_SUBWOOFERVOLUME:
-                if ($this->SetZoneParameter('setSubwooferVolume', ['volume' => $value])) {
+                if ($this->SetZoneParameter('setSubwooferVolume', ['volume' => (int)($value * 2)])) {
                     $this->SetValue($ident, $value);
                 }
                 break;
             case self::VAR_SURROUNDAI:
-                if ($this->SetZoneParameter('setSurroundAI', ['enable' => $value?'true':'false'])) {
+                if ($this->SetZoneParameter('setSurroundAI', ['enable' => $value ? 'true' : 'false'])) {
                     $this->SetValue($ident, $value);
                 }
                 break;
@@ -402,7 +408,7 @@ class YAVR extends IPSModule
         }
     }
 
-    public function RequestStatus():bool
+    public function RequestStatus(): bool
     {
         $remoteControl_BasicStatus = $this->Request('<Basic_Status>GetParam</Basic_Status>', 'GET');
         if ($remoteControl_BasicStatus === false) {
@@ -435,7 +441,7 @@ class YAVR extends IPSModule
         ....
          */
 
-        $this->SetValue(self::VAR_STATE, $remoteControl_BasicStatus->Basic_Status->Power_Control->Power == 'On');
+        $this->SetValue(self::VAR_STATE, $remoteControl_BasicStatus->Basic_Status->Power_Control->Power === 'On');
 
         $inputId = $this->GetInputId((string)$remoteControl_BasicStatus->Basic_Status->Input->Input_Sel);
         if ($inputId !== null) {
@@ -446,7 +452,43 @@ class YAVR extends IPSModule
 
         $this->SetValue(self::VAR_MUTE, $remoteControl_BasicStatus->Basic_Status->Volume->Mute == 'On');
 
-        return !($this->RequestExtendedControlList('getStatus', 'GET', $this->GetYECZoneName(), '') === null);
+        $remoteControl_ExtendedControlList = $this->RequestExtendedControlList('getStatus', 'GET', $this->GetYECZoneName(), '');
+
+        if ($remoteControl_ExtendedControlList === null) {
+            return false;
+        }
+
+        $this->SetValue(self::VAR_PARTYMODE, $remoteControl_ExtendedControlList['party_enable'] === ' true');
+
+        $this->SetValue(self::VAR_PUREDIRECT, $remoteControl_ExtendedControlList['pure_direct'] === 'true');
+
+        $this->SetValue(self::VAR_ENHANCER, $remoteControl_ExtendedControlList['enhancer'] === 'true');
+
+        $this->SetValue(self::VAR_TONECONTROL, $remoteControl_ExtendedControlList['tone_control']['mode'] === 'manual');
+
+        $this->SetValue(self::VAR_BASS, $remoteControl_ExtendedControlList['tone_control']['bass'] / 2);
+
+        $this->SetValue(self::VAR_TREBLE, $remoteControl_ExtendedControlList['tone_control']['treble'] / 2);
+
+        $this->SetValue(self::VAR_DIALOGUELEVEL, $remoteControl_ExtendedControlList['dialogue_level']);
+
+        $this->SetValue(self::VAR_DIALOGUELIFT, $remoteControl_ExtendedControlList['dialogue_lift']);
+
+        $this->SetValue(self::VAR_SUBWOOFERVOLUME, $remoteControl_ExtendedControlList['subwoofer_volume'] / 2);
+
+        $this->SetValue(self::VAR_SURROUNDAI, $remoteControl_ExtendedControlList['surround_ai'] === 'true');
+
+        return true;
+    }
+
+    protected function SetValue($ident, $value): bool
+    {
+        /** @noinspection TypeUnsafeComparisonInspection */
+        if ($this->GetValue($ident) != $value) {
+            return parent::SetValue($ident, $value);
+        }
+
+        return true;
     }
 
     public function Request(string $partial, string $cmd = 'GET')
