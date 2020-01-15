@@ -479,6 +479,8 @@ class YAVR extends IPSModule
 
         $this->SetValue(self::VAR_SURROUNDAI, $remoteControl_ExtendedControlList['surround_ai'] === 'true');
 
+        $this->SetValue(self::VAR_SOUNDPROGRAM, $this->getSoundProgramByName($remoteControl_ExtendedControlList['sound_program']));
+
         return true;
     }
 
@@ -486,12 +488,23 @@ class YAVR extends IPSModule
     {
         /** @noinspection TypeUnsafeComparisonInspection */
         if ($this->GetValue($ident) != $value) {
+            $this->SendDebug(__FUNCTION__, sprintf('%s: %s -> %s', $ident, $this->GetValue($ident), $value), 0);
             return parent::SetValue($ident, $value);
         }
 
         return true;
     }
 
+    private function getSoundProgramByName(string $name): int
+    {
+        foreach (self::SOUNDPROGRAMS as $id => $soundProgram){
+            if ($soundProgram['name'] === $name){
+                return $id;
+            }
+        }
+        trigger_error('Sound Program ID not found for: ' . $name, E_USER_ERROR);
+        return 0;
+    }
     public function Request(string $partial, string $cmd = 'GET')
     {
         $host   = $this->ReadPropertyString(self::PROP_HOST);
