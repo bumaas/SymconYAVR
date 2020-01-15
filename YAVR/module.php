@@ -348,7 +348,7 @@ class YAVR extends IPSModule
                 $this->SetVolume($value);
                 break;
             case self::VAR_PARTYMODE:
-                if ($this->SetZoneParameter('setPartyMode', ['enable' => $value ? 'true' : 'false'])) {
+                if ($this->SetSystemParameter('setPartyMode', ['enable' => $value ? 'true' : 'false'])) {
                     $this->SetValue($ident, $value);
                 }
                 break;
@@ -441,7 +441,7 @@ class YAVR extends IPSModule
         ....
          */
 
-        $this->SetValue(self::VAR_STATE, $remoteControl_BasicStatus->Basic_Status->Power_Control->Power === 'On');
+        $this->SetValue(self::VAR_STATE, (string) $remoteControl_BasicStatus->Basic_Status->Power_Control->Power === 'On');
 
         $inputId = $this->GetInputId((string)$remoteControl_BasicStatus->Basic_Status->Input->Input_Sel);
         if ($inputId !== null) {
@@ -450,15 +450,16 @@ class YAVR extends IPSModule
 
         $this->SetValue(self::VAR_VOLUME, round($remoteControl_BasicStatus->Basic_Status->Volume->Lvl->Val / 10, 1));
 
-        $this->SetValue(self::VAR_MUTE, $remoteControl_BasicStatus->Basic_Status->Volume->Mute == 'On');
+        $this->SetValue(self::VAR_MUTE, (string) $remoteControl_BasicStatus->Basic_Status->Volume->Mute === 'On');
 
+        //'getStatus' über Extended Control List abfragen
         $remoteControl_ExtendedControlList = $this->RequestExtendedControlList('getStatus', 'GET', $this->GetYECZoneName(), '');
 
         if ($remoteControl_ExtendedControlList === null) {
             return false;
         }
 
-        $this->SetValue(self::VAR_PARTYMODE, $remoteControl_ExtendedControlList['party_enable'] === ' true');
+        $this->SetValue(self::VAR_PARTYMODE, $remoteControl_ExtendedControlList['party_enable'] === 'true');
 
         $this->SetValue(self::VAR_PUREDIRECT, $remoteControl_ExtendedControlList['pure_direct'] === 'true');
 
@@ -598,6 +599,13 @@ class YAVR extends IPSModule
         $this->SetValue(self::VAR_STATE, $state);
         $power = $state ? 'On' : 'Standby';
         return $this->Request("<Power_Control><Power>{$power}</Power></Power_Control>", 'PUT');
+    }
+
+    private function SetSystemParameter(string $partialPath, array $values): bool
+    {
+        $json = $this->RequestExtendedControl($partialPath, 'GET', '', json_encode($values, JSON_THROW_ON_ERROR, 512));
+
+        return !(($json === false) || json_decode($json, true, 512, JSON_THROW_ON_ERROR)['response_code'] !== 0);
     }
 
     private function SetZoneParameter(string $partialPath, array $values): bool
