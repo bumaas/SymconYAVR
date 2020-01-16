@@ -16,22 +16,26 @@ class YAVR extends IPSModule
     private const ATTR_SCENESMAPPING = 'ScenesMapping';
 
     //status variable names
-    private const VAR_SCENE           = 'Scene';
-    private const VAR_INPUT           = 'Input';
-    private const VAR_STATE           = 'State';
-    private const VAR_MUTE            = 'Mute';
-    private const VAR_VOLUME          = 'Volume';
-    private const VAR_SOUNDPROGRAM    = 'SoundProgram';
-    private const VAR_PARTYMODE       = 'PartyMode';
-    private const VAR_PUREDIRECT      = 'PureDirect';
-    private const VAR_ENHANCER        = 'Enhancer';
-    private const VAR_TONECONTROL     = 'ToneControl';
-    private const VAR_BASS            = 'Bass';
-    private const VAR_TREBLE          = 'Treble';
-    private const VAR_DIALOGUELEVEL   = 'DialogueLevel';
-    private const VAR_DIALOGUELIFT    = 'DialogueLift';
-    private const VAR_SUBWOOFERVOLUME = 'SubwooferVolume';
-    private const VAR_SURROUNDAI      = 'SurroundAI';
+    private const VAR_SCENE            = 'Scene';
+    private const VAR_INPUT            = 'Input';
+    private const VAR_STATE            = 'State';
+    private const VAR_MUTE             = 'Mute';
+    private const VAR_VOLUME           = 'Volume';
+    private const VAR_SOUNDPROGRAM     = 'SoundProgram';
+    private const VAR_PARTYMODE        = 'PartyMode';
+    private const VAR_PUREDIRECT       = 'PureDirect';
+    private const VAR_ENHANCER         = 'Enhancer';
+    private const VAR_TONECONTROL      = 'ToneControl';
+    private const VAR_BASS             = 'Bass';
+    private const VAR_TREBLE           = 'Treble';
+    private const VAR_DIALOGUELEVEL    = 'DialogueLevel';
+    private const VAR_DIALOGUELIFT     = 'DialogueLift';
+    private const VAR_SUBWOOFERVOLUME  = 'SubwooferVolume';
+    private const VAR_SURROUNDAI       = 'SurroundAI';
+    private const VAR_YPAOVOLUME       = 'YPAOVolume';
+    private const VAR_ADAPTIVEDRC      = 'AdaptiveDRC';
+    private const VAR_ADAPTIVEDSPLEVEL = 'AdaptiveDSPLevel';
+    private const VAR_EXTRABASS        = 'ExtraBass';
 
 
     //timer names
@@ -256,6 +260,18 @@ class YAVR extends IPSModule
         $this->RegisterVariableBoolean(self::VAR_SURROUNDAI, 'Surround AI', '~Switch', 0);
         $this->EnableAction(self::VAR_SURROUNDAI);
 
+        $this->RegisterVariableBoolean(self::VAR_YPAOVOLUME, 'YPAO Volume', '~Switch', 0);
+        $this->EnableAction(self::VAR_YPAOVOLUME);
+
+        $this->RegisterVariableBoolean(self::VAR_ADAPTIVEDRC, 'Adaptive DRC', '~Switch', 0);
+        $this->EnableAction(self::VAR_ADAPTIVEDRC);
+
+        $this->RegisterVariableBoolean(self::VAR_ADAPTIVEDSPLEVEL, 'Adaptive DSP Level', '~Switch', 0);
+        $this->EnableAction(self::VAR_ADAPTIVEDSPLEVEL);
+
+        $this->RegisterVariableBoolean(self::VAR_EXTRABASS, 'Extra Bass', '~Switch', 0);
+        $this->EnableAction(self::VAR_EXTRABASS);
+
         $this->RequestStatus();
         $this->SetTimerInterval(self::TIMER_UPDATE, $this->ReadPropertyInteger('UpdateInterval') * 1000);
 
@@ -403,6 +419,26 @@ class YAVR extends IPSModule
                     $this->SetValue($ident, $value);
                 }
                 break;
+            case self::VAR_YPAOVOLUME:
+                if ($this->SetSystemParameter('setYpaoVolume', ['enable' => $value ? 'true' : 'false'])) {
+                    $this->SetValue($ident, $value);
+                }
+                break;
+            case self::VAR_ADAPTIVEDRC:
+                if ($this->SetZoneParameter('setAdaptiveDrc', ['enable' => $value ? 'true' : 'false'])) {
+                    $this->SetValue($ident, $value);
+                }
+                break;
+            case self::VAR_ADAPTIVEDSPLEVEL:
+                if ($this->SetZoneParameter('setAdaptiveDspLevel', ['enable' => $value ? 'true' : 'false'])) {
+                    $this->SetValue($ident, $value);
+                }
+                break;
+            case self::VAR_EXTRABASS:
+                if ($this->SetZoneParameter('setExtraBass', ['enable' => $value ? 'true' : 'false'])) {
+                    $this->SetValue($ident, $value);
+                }
+                break;
             default:
                 trigger_error('Unexpected ident: ' . $ident, E_USER_ERROR);
         }
@@ -441,7 +477,7 @@ class YAVR extends IPSModule
         ....
          */
 
-        $this->SetValue(self::VAR_STATE, (string) $remoteControl_BasicStatus->Basic_Status->Power_Control->Power === 'On');
+        $this->SetValue(self::VAR_STATE, (string)$remoteControl_BasicStatus->Basic_Status->Power_Control->Power === 'On');
 
         $inputId = $this->GetInputId((string)$remoteControl_BasicStatus->Basic_Status->Input->Input_Sel);
         if ($inputId !== null) {
@@ -450,7 +486,7 @@ class YAVR extends IPSModule
 
         $this->SetValue(self::VAR_VOLUME, round($remoteControl_BasicStatus->Basic_Status->Volume->Lvl->Val / 10, 1));
 
-        $this->SetValue(self::VAR_MUTE, (string) $remoteControl_BasicStatus->Basic_Status->Volume->Mute === 'On');
+        $this->SetValue(self::VAR_MUTE, (string)$remoteControl_BasicStatus->Basic_Status->Volume->Mute === 'On');
 
         //'getStatus' über Extended Control List abfragen
         $remoteControl_ExtendedControlList = $this->RequestExtendedControlList('getStatus', 'GET', $this->GetYECZoneName(), '');
@@ -479,6 +515,12 @@ class YAVR extends IPSModule
 
         $this->SetValue(self::VAR_SURROUNDAI, $remoteControl_ExtendedControlList['surround_ai']);
 
+        $this->SetValue(self::VAR_ADAPTIVEDRC, $remoteControl_ExtendedControlList['adaptive_drc']);
+
+        $this->SetValue(self::VAR_ADAPTIVEDSPLEVEL, $remoteControl_ExtendedControlList['adaptive_dsp_level']);
+
+        $this->SetValue(self::VAR_EXTRABASS, $remoteControl_ExtendedControlList['extra_bass']);
+
         $this->SetValue(self::VAR_SOUNDPROGRAM, $this->getSoundProgramByName($remoteControl_ExtendedControlList['sound_program']));
 
         return true;
@@ -497,14 +539,15 @@ class YAVR extends IPSModule
 
     private function getSoundProgramByName(string $name): int
     {
-        foreach (self::SOUNDPROGRAMS as $id => $soundProgram){
-            if ($soundProgram['name'] === $name){
+        foreach (self::SOUNDPROGRAMS as $id => $soundProgram) {
+            if ($soundProgram['name'] === $name) {
                 return $id;
             }
         }
         trigger_error('Sound Program ID not found for: ' . $name, E_USER_ERROR);
         return 0;
     }
+
     public function Request(string $partial, string $cmd = 'GET')
     {
         $host   = $this->ReadPropertyString(self::PROP_HOST);
